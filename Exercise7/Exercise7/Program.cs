@@ -24,8 +24,8 @@ namespace Exercise7
 
     public enum Result
     {
-        PlayerOneVictory,
-        PlayerTwoVictory,
+        PlayerOneWin,
+        PlayerTwoWin,
         Draw
     }
 
@@ -43,7 +43,7 @@ namespace Exercise7
             while (gameResult == Result.Draw)
             {
                 PlayRound();
-                gameResult = VictoryCheck();
+                gameResult = WinCheck();
             }
 
             return gameResult;
@@ -53,17 +53,22 @@ namespace Exercise7
         {
             Random rnd = new Random();
 
-            var playerOneToken = (Token) rnd.Next(0, 2);
-            var playerTwoToken = (Token) rnd.Next(0, 2);
+            var playerOneToken = (Token)rnd.Next(0, 2);
+            var playerTwoToken = (Token)rnd.Next(0, 2);
 
+            PlayRound(playerOneToken, playerTwoToken);
+        }
+
+        public void PlayRound(Token playerOneToken, Token playerTwoToken)
+        {
             var result = TokenCheck(playerOneToken, playerTwoToken);
 
             switch (result)
             {
-                    case Result.PlayerOneVictory:
+                    case Result.PlayerOneWin:
                         PlayerOneScore += 1;
                         break;
-                    case Result.PlayerTwoVictory:
+                    case Result.PlayerTwoWin:
                         PlayerTwoScore += 1;
                         break;
                     case Result.Draw:
@@ -71,16 +76,16 @@ namespace Exercise7
             }
         }
 
-        public Result VictoryCheck()
+        public Result WinCheck()
         {
             //best of 3, draws don't count, so first to 2 wins
             if (PlayerOneScore == 2)
             {
-                return Result.PlayerOneVictory;
+                return Result.PlayerOneWin;
             }
             if (PlayerTwoScore == 2)
             {
-                return Result.PlayerTwoVictory;
+                return Result.PlayerTwoWin;
             }
 
             return Result.Draw;
@@ -96,29 +101,29 @@ namespace Exercise7
                             case Token.Rock:
                                 return Result.Draw;
                             case Token.Paper:
-                                return Result.PlayerTwoVictory;
+                                return Result.PlayerTwoWin;
                             case Token.Scissors:
-                                return Result.PlayerOneVictory;
+                                return Result.PlayerOneWin;
                     }
                     break;
                case Token.Paper:
                     switch (playerTwoToken)
                     {
                         case Token.Rock:
-                            return Result.PlayerOneVictory;
+                            return Result.PlayerOneWin;
                         case Token.Paper:
                             return Result.Draw;
                         case Token.Scissors:
-                            return Result.PlayerTwoVictory;
+                            return Result.PlayerTwoWin;
                     }
                     break;
                 case Token.Scissors:
                     switch (playerTwoToken)
                     {
                         case Token.Rock:
-                            return Result.PlayerTwoVictory;
+                            return Result.PlayerTwoWin;
                         case Token.Paper:
-                            return Result.PlayerOneVictory;
+                            return Result.PlayerOneWin;
                         case Token.Scissors:
                             return Result.Draw;
                     }
@@ -136,10 +141,7 @@ namespace Exercise7
         {
             var game = new Game();
 
-            Token rock = Token.Rock;
-            Token scissors = Token.Scissors;
-
-            Assert.AreEqual(game.TokenCheck(rock, scissors), Result.PlayerOneVictory);
+            Assert.AreEqual(game.TokenCheck(Token.Rock, Token.Scissors), Result.PlayerOneWin);
         }
 
         [Test]
@@ -147,10 +149,7 @@ namespace Exercise7
         {
             var game = new Game();
 
-            Token rock = Token.Rock;
-            Token paper = Token.Paper;
-
-            Assert.AreEqual(game.TokenCheck(rock, paper), Result.PlayerTwoVictory);
+            Assert.AreEqual(game.TokenCheck(Token.Rock, Token.Paper), Result.PlayerTwoWin);
         }
 
         [Test]
@@ -158,10 +157,53 @@ namespace Exercise7
         {
             var game = new Game();
 
-            Token paper = Token.Paper;
-            Token scissors = Token.Scissors;
+            Assert.AreEqual(game.TokenCheck(Token.Paper, Token.Scissors), Result.PlayerTwoWin);
+        }
 
-            Assert.AreEqual(game.TokenCheck(paper, scissors), Result.PlayerTwoVictory);
+        [Test]
+        public void DrawRoundDoesntChangeScore()
+        {
+            var game = new Game();
+
+            var playerOneScoreBefore = game.PlayerOneScore;
+            var playerTwoScoreBefore = game.PlayerTwoScore;
+
+            game.PlayRound(Token.Paper, Token.Paper);
+
+            var playerOneScoreAfter = game.PlayerOneScore;
+            var playerTwoScoreAfter = game.PlayerTwoScore;
+
+            Assert.AreEqual(playerOneScoreBefore, playerOneScoreAfter);
+            Assert.AreEqual(playerTwoScoreBefore, playerTwoScoreAfter);
+        }
+
+        [Test]
+        public void PlayerOneWinIncreasesScore()
+        {
+            var game = new Game();
+
+            var playerOneScoreBefore = game.PlayerOneScore;
+
+            game.PlayRound(Token.Scissors, Token.Paper);
+
+            var playerOneScoreAfter = game.PlayerOneScore;
+
+            Assert.AreEqual(playerOneScoreBefore + 1, playerOneScoreAfter);
+        }
+
+        [Test]
+        public void PlayerTwoWinIncreasesScore()
+        {
+            var game = new Game();
+
+            var playerTwoScoreBefore = game.PlayerTwoScore;
+
+            game.PlayRound(Token.Scissors, Token.Rock);
+
+            var playerTwoScoreAfter = game.PlayerTwoScore;
+
+            Assert.AreEqual(playerTwoScoreBefore + 1, playerTwoScoreAfter);
         }
     }
 }
+
